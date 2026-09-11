@@ -1,0 +1,6 @@
+{
+  "name": "AI Writing Tool",
+  "description": "Comprehensive AI writing assistant with tools for essays, articles, emails, social media captions, summarization, rewriting, grammar correction, translation, and study notes in English, Hindi, and Marathi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
