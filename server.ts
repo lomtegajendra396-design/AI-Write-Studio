@@ -39,6 +39,64 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// Sitemap XML endpoint with canonical host resolution
+app.get("/sitemap.xml", (req, res) => {
+  const host = req.get("host") || "localhost:3000";
+  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+  const baseUrl = `${protocol}://${host}`;
+  const today = new Date().toISOString().split("T")[0];
+
+  const tools = [
+    "ai-writer",
+    "essay-writer",
+    "article-writer",
+    "email-generator",
+    "social-media-caption",
+    "summarizer",
+    "text-rewriter",
+    "grammar-corrector",
+    "translator",
+    "study-notes",
+  ];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/?lang=English" />
+    <xhtml:link rel="alternate" hreflang="hi" href="${baseUrl}/?lang=Hindi" />
+    <xhtml:link rel="alternate" hreflang="mr" href="${baseUrl}/?lang=Marathi" />
+  </url>
+${tools
+  .map(
+    (tool) => `  <url>
+    <loc>${baseUrl}/?tool=${tool}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`
+  )
+  .join("\n")}
+</urlset>`;
+
+  res.header("Content-Type", "application/xml; charset=utf-8");
+  res.send(xml);
+});
+
+// Robots.txt endpoint
+app.get("/robots.txt", (req, res) => {
+  const host = req.get("host") || "localhost:3000";
+  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+  const baseUrl = `${protocol}://${host}`;
+
+  res.type("text/plain");
+  res.send(["User-agent: *", "Allow: /", "", `Sitemap: ${baseUrl}/sitemap.xml`].join("\n") + "\n");
+});
+
 // Prompt construction helper
 function buildPrompt(body: {
   toolId: string;

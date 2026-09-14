@@ -16,9 +16,37 @@ import { AlertCircle, CheckCircle2, Sparkles, X } from "lucide-react";
 const STORAGE_KEY = "ai_writing_tool_history_v1";
 
 export default function App() {
-  const [selectedToolId, setSelectedToolId] = useState<ToolId>("ai-writer");
-  const [language, setLanguage] = useState<LanguageCode>("English");
+  const [selectedToolId, setSelectedToolId] = useState<ToolId>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tool") as ToolId;
+      if (t && TOOLS.some((tool) => tool.id === t)) return t;
+    } catch {}
+    return "ai-writer";
+  });
+  const [language, setLanguage] = useState<LanguageCode>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const l = params.get("lang") as LanguageCode;
+      if (l === "English" || l === "Hindi" || l === "Marathi") return l;
+    } catch {}
+    return "English";
+  });
   const [tone, setTone] = useState<ToneType>("Professional");
+
+  // Keep URL search params in sync with active tool and language
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tool", selectedToolId);
+      if (language !== "English") {
+        url.searchParams.set("lang", language);
+      } else {
+        url.searchParams.delete("lang");
+      }
+      window.history.replaceState(null, "", url.toString());
+    } catch {}
+  }, [selectedToolId, language]);
   const [prompt, setPrompt] = useState<string>("");
   const [secondaryInput, setSecondaryInput] = useState<string>("");
   const [options, setOptions] = useState<any>({
